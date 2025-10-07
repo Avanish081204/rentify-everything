@@ -5,9 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignIn() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,8 +20,9 @@ export default function SignIn() {
 
     // Simulate authentication
     setTimeout(() => {
+      login(email, password);
       toast.success('Welcome back!');
-      navigate('/');
+      navigate('/dashboard');
       setLoading(false);
     }, 1000);
   };

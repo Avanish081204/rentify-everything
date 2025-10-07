@@ -1,13 +1,24 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Home, Search, Building2, Car, Wrench, Info, Phone, Heart } from 'lucide-react';
+import { Menu, X, Home, Search, Building2, Car, Wrench, Heart, LayoutDashboard, LogOut } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, logout, user } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = () => {
+    logout();
+    toast.success('Logged out successfully');
+    navigate('/');
+    setMobileMenuOpen(false);
+  };
 
   const navLinks = [
     { path: '/', label: 'Home', icon: Home },
@@ -49,12 +60,29 @@ export const Header = () => {
               <Heart className="h-5 w-5" />
             </Button>
           </Link>
-          <Link to="/auth/signin">
-            <Button variant="outline">Sign In</Button>
-          </Link>
-          <Link to="/auth/signup">
-            <Button>Sign Up</Button>
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link to="/dashboard">
+                <Button variant="outline" className="gap-2">
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
+              <Button variant="ghost" onClick={handleLogout} className="gap-2">
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/auth/signin">
+                <Button variant="outline">Sign In</Button>
+              </Link>
+              <Link to="/auth/signup">
+                <Button>Sign Up</Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -90,12 +118,29 @@ export const Header = () => {
                   Favorites
                 </Button>
               </Link>
-              <Link to="/auth/signin" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="outline" className="w-full">Sign In</Button>
-              </Link>
-              <Link to="/auth/signup" onClick={() => setMobileMenuOpen(false)}>
-                <Button className="w-full">Sign Up</Button>
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="outline" className="w-full justify-start gap-2">
+                      <LayoutDashboard className="h-4 w-4" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Button variant="ghost" onClick={handleLogout} className="w-full justify-start gap-2">
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/auth/signin" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="outline" className="w-full">Sign In</Button>
+                  </Link>
+                  <Link to="/auth/signup" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="w-full">Sign Up</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>

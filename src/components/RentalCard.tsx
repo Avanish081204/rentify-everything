@@ -3,15 +3,21 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Heart, Star, MapPin } from 'lucide-react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useFavorites } from '@/hooks/useFavorites';
+import { toast } from 'sonner';
 
 interface RentalCardProps {
   item: RentalItem;
 }
 
 export const RentalCard = ({ item }: RentalCardProps) => {
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favorited = isFavorite(item.id);
+
+  const handleFavoriteClick = () => {
+    toggleFavorite(item.id);
+    toast.success(favorited ? 'Removed from favorites' : 'Added to favorites');
+  };
 
   return (
     <Card className="overflow-hidden card-shadow hover:card-shadow-hover transition-smooth group">
@@ -25,9 +31,9 @@ export const RentalCard = ({ item }: RentalCardProps) => {
           size="icon"
           variant="secondary"
           className="absolute top-3 right-3 rounded-full"
-          onClick={() => setIsFavorite(!isFavorite)}
+          onClick={handleFavoriteClick}
         >
-          <Heart className={`h-4 w-4 ${isFavorite ? 'fill-current text-red-500' : ''}`} />
+          <Heart className={`h-4 w-4 ${favorited ? 'fill-current text-red-500' : ''}`} />
         </Button>
         {item.isFeatured && (
           <Badge className="absolute top-3 left-3 bg-secondary">Featured</Badge>
