@@ -11,6 +11,7 @@ export interface RentalItem {
   category: RentalCategory;
   subcategory: string;
   price: number;
+  purchasePrice?: number; // Price to buy the item outright
   duration: RentalDuration;
   location: string;
   distance?: number;
@@ -27,6 +28,17 @@ export interface RentalItem {
   insurance?: boolean;
   instantBooking?: boolean;
   isFeatured?: boolean;
+}
+
+export interface ActiveRental {
+  id: string;
+  rentalItemId: string;
+  item: RentalItem;
+  startDate: string;
+  endDate: string;
+  totalPrice: number;
+  isPurchase: boolean;
+  status: 'active' | 'completed' | 'cancelled';
 }
 
 export interface SearchFilters {

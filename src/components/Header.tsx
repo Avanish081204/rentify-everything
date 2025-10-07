@@ -1,8 +1,10 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Home, Search, Building2, Car, Wrench, Heart, LayoutDashboard, LogOut } from 'lucide-react';
+import { Menu, X, Home, Search, Building2, Car, Wrench, Heart, LayoutDashboard, LogOut, Package } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveRentals } from '@/hooks/useActiveRentals';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
 export const Header = () => {
@@ -10,6 +12,7 @@ export const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, logout, user } = useAuth();
+  const { activeCount } = useActiveRentals();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -62,6 +65,16 @@ export const Header = () => {
           </Link>
           {isAuthenticated ? (
             <>
+              <Link to="/active-rentals">
+                <Button variant="ghost" size="icon" className="relative">
+                  <Package className="h-5 w-5" />
+                  {activeCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                      {activeCount}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
               <Link to="/dashboard">
                 <Button variant="outline" className="gap-2">
                   <LayoutDashboard className="h-4 w-4" />
@@ -120,6 +133,15 @@ export const Header = () => {
               </Link>
               {isAuthenticated ? (
                 <>
+                  <Link to="/active-rentals" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start gap-2">
+                      <Package className="h-4 w-4" />
+                      Active Rentals
+                      {activeCount > 0 && (
+                        <Badge className="ml-auto">{activeCount}</Badge>
+                      )}
+                    </Button>
+                  </Link>
                   <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                     <Button variant="outline" className="w-full justify-start gap-2">
                       <LayoutDashboard className="h-4 w-4" />

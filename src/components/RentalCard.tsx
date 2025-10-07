@@ -2,9 +2,14 @@ import { RentalItem } from '@/types/rental';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Star, MapPin } from 'lucide-react';
+import { Heart, Star, MapPin, ShoppingBag } from 'lucide-react';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useActiveRentals } from '@/hooks/useActiveRentals';
 import { toast } from 'sonner';
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 interface RentalCardProps {
   item: RentalItem;
@@ -12,11 +17,38 @@ interface RentalCardProps {
 
 export const RentalCard = ({ item }: RentalCardProps) => {
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { addRental } = useActiveRentals();
   const favorited = isFavorite(item.id);
+  const [showBooking, setShowBooking] = useState(false);
+  const [bookingType, setBookingType] = useState<'rent' | 'buy'>('rent');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   const handleFavoriteClick = () => {
     toggleFavorite(item.id);
     toast.success(favorited ? 'Removed from favorites' : 'Added to favorites');
+  };
+
+  const handleBookNow = (type: 'rent' | 'buy') => {
+    setBookingType(type);
+    setShowBooking(true);
+  };
+
+  const confirmBooking = () => {
+    const rental = {
+      id: `rental-${Date.now()}`,
+      rentalItemId: item.id,
+      item,
+      startDate: bookingType === 'rent' ? startDate : new Date().toISOString(),
+      endDate: bookingType === 'rent' ? endDate : new Date().toISOString(),
+      totalPrice: bookingType === 'buy' ? (item.purchasePrice || 0) : item.price,
+      isPurchase: bookingType === 'buy',
+      status: 'active' as const,
+    };
+    
+    addRental(rental);
+    setShowBooking(false);
+    toast.success(bookingType === 'buy' ? 'Purchase confirmed!' : 'Rental booked successfully!');
   };
 
   return (
@@ -78,10 +110,86 @@ export const RentalCard = ({ item }: RentalCardProps) => {
           <div>
             <span className="text-2xl font-bold text-primary">${item.price}</span>
             <span className="text-sm text-muted-foreground">/{item.duration}</span>
+            {item.purchasePrice && (
+              <div className="text-xs text-muted-foreground">
+                or ${item.purchasePrice.toLocaleString()} to buy
+              </div>
+            )}
           </div>
-          <Button>Book Now</Button>
+          <div className="flex gap-2">
+            <Button onClick={() => handleBookNow('rent')}>Rent</Button>
+            {item.purchasePrice && (
+              <Button variant="outline" onClick={() => handleBookNow('buy')} className="gap-1">
+                <ShoppingBag className="h-4 w-4" />
+                Buy
+              </Button>
+            )}
+          </div>
         </div>
       </div>
+
+      <Dialog open={showBooking} onOpenChange={setShowBooking}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {bookingType === 'buy' ? 'Purchase' : 'Rent'} {item.title}
+            </DialogTitle>
+            <DialogDescription>
+              {bookingType === 'buy' 
+                ? `Purchase this item for $${item.purchasePrice?.toLocaleString()}`
+                : 'Select your rental dates'}
+            </DialogDescription>
+          </DialogHeader>
+
+          {bookingType === 'rent' && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="start-date">Start Date</Label>
+                <Input
+                  id="start-date"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="end-date">End Date</Label>
+                <Input
+                  id="end-date"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  min={startDate || new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              <div className="bg-muted p-4 rounded-lg">
+                <p className="text-sm font-semibold">Rental Price</p>
+                <p className="text-2xl font-bold text-primary">${item.price}/{item.duration}</p>
+              </div>
+            </div>
+          )}
+
+          {bookingType === 'buy' && (
+            <div className="bg-muted p-4 rounded-lg my-4">
+              <p className="text-sm font-semibold">Purchase Price</p>
+              <p className="text-2xl font-bold text-primary">${item.purchasePrice?.toLocaleString()}</p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBooking(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={confirmBooking}
+              disabled={bookingType === 'rent' && (!startDate || !endDate)}
+            >
+              Confirm {bookingType === 'buy' ? 'Purchase' : 'Booking'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

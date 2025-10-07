@@ -12,6 +12,7 @@ import Properties from "./pages/Properties";
 import Vehicles from "./pages/Vehicles";
 import Equipment from "./pages/Equipment";
 import Dashboard from "./pages/Dashboard";
+import ActiveRentals from "./pages/ActiveRentals";
 import Favorites from "./pages/Favorites";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
@@ -36,6 +37,7 @@ const App = () => (
                 <Route path="/vehicles" element={<Vehicles />} />
                 <Route path="/equipment" element={<Equipment />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/active-rentals" element={<ActiveRentals />} />
                 <Route path="/favorites" element={<Favorites />} />
                 <Route path="/auth/signin" element={<SignIn />} />
                 <Route path="/auth/signup" element={<SignUp />} />

@@ -1,5 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useActiveRentals } from '@/hooks/useActiveRentals';
 import { mockRentals } from '@/data/mockRentals';
 import { RentalCard } from '@/components/RentalCard';
 import { Link } from 'react-router-dom';
@@ -10,6 +11,7 @@ import { Heart, Package, User } from 'lucide-react';
 export default function Dashboard() {
   const { user } = useAuth();
   const { favorites } = useFavorites();
+  const { activeCount } = useActiveRentals();
   
   const favoriteItems = mockRentals.filter(item => favorites.includes(item.id));
 
@@ -34,17 +36,19 @@ export default function Dashboard() {
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <Package className="h-6 w-6 text-primary" />
+          <Link to="/active-rentals">
+            <Card className="p-6 cursor-pointer hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-lg">
+                  <Package className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{activeCount}</p>
+                  <p className="text-sm text-muted-foreground">Active Rentals</p>
+                </div>
               </div>
-              <div>
-                <p className="text-2xl font-bold">0</p>
-                <p className="text-sm text-muted-foreground">Active Rentals</p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </Link>
 
           <Card className="p-6">
             <div className="flex items-center gap-4">
