@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Heart, Star, MapPin, ShoppingBag } from 'lucide-react';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useActiveRentals } from '@/hooks/useActiveRentals';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -18,6 +20,8 @@ interface RentalCardProps {
 export const RentalCard = ({ item }: RentalCardProps) => {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { addRental } = useActiveRentals();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const favorited = isFavorite(item.id);
   const [showBooking, setShowBooking] = useState(false);
   const [bookingType, setBookingType] = useState<'rent' | 'buy'>('rent');
@@ -30,6 +34,11 @@ export const RentalCard = ({ item }: RentalCardProps) => {
   };
 
   const handleBookNow = (type: 'rent' | 'buy') => {
+    if (!isAuthenticated) {
+      toast.error('Please sign in to rent or buy items');
+      navigate('/auth/signin');
+      return;
+    }
     setBookingType(type);
     setShowBooking(true);
   };

@@ -96,18 +96,26 @@ export default function Home() {
         <div className="container">
           <h2 className="text-3xl font-bold text-center mb-12">Browse by Category</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {categories.map((cat) => (
-              <button
-                key={cat.value}
-                onClick={() => navigate(`/${cat.value === 'property' ? 'properties' : cat.value === 'vehicle' ? 'vehicles' : cat.value}s`)}
-                className="p-6 bg-card rounded-xl card-shadow hover:card-shadow-hover transition-smooth text-center group"
-              >
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors mb-4">
-                  <cat.icon className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="font-semibold">{cat.label}</h3>
-              </button>
-            ))}
+            {categories.map((cat) => {
+              const pathMap: Record<string, string> = {
+                property: '/properties',
+                vehicle: '/vehicles',
+                equipment: '/equipment',
+                electronics: '/equipment'
+              };
+              return (
+                <button
+                  key={cat.value}
+                  onClick={() => navigate(pathMap[cat.value] || '/browse')}
+                  className="p-6 bg-card rounded-xl card-shadow hover:card-shadow-hover transition-smooth text-center group"
+                >
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors mb-4">
+                    <cat.icon className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="font-semibold">{cat.label}</h3>
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
