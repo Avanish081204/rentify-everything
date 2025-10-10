@@ -19,7 +19,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="container py-12">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Welcome back, {user?.name}!</h1>
+          <h1 className="text-4xl font-bold mb-2">Welcome back!</h1>
           <p className="text-muted-foreground">Manage your rentals and favorites</p>
         </div>
 
