@@ -30,7 +30,7 @@ export default function Home() {
   const stats = [
     { label: 'Active Listings', value: '10,000+' },
     { label: 'Happy Customers', value: '50,000+' },
-    { label: 'Cities Covered', value: '200+' },
+    { label: 'Cities Covered', value: '50+' },
     { label: 'Average Rating', value: '4.8/5' },
   ];
 

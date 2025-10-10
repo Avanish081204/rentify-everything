@@ -97,7 +97,7 @@ export const RentalCard = ({ item }: RentalCardProps) => {
             <span>{item.location}</span>
           </div>
           {item.distance && (
-            <span>{item.distance} mi</span>
+            <span>{item.distance} km</span>
           )}
         </div>
 
@@ -117,11 +117,11 @@ export const RentalCard = ({ item }: RentalCardProps) => {
 
         <div className="flex items-center justify-between pt-2 border-t">
           <div>
-            <span className="text-2xl font-bold text-primary">${item.price}</span>
+            <span className="text-2xl font-bold text-primary">₹{item.price.toLocaleString('en-IN')}</span>
             <span className="text-sm text-muted-foreground">/{item.duration}</span>
             {item.purchasePrice && (
               <div className="text-xs text-muted-foreground">
-                or ${item.purchasePrice.toLocaleString()} to buy
+                or ₹{item.purchasePrice.toLocaleString('en-IN')} to buy
               </div>
             )}
           </div>
@@ -145,7 +145,7 @@ export const RentalCard = ({ item }: RentalCardProps) => {
             </DialogTitle>
             <DialogDescription>
               {bookingType === 'buy' 
-                ? `Purchase this item for $${item.purchasePrice?.toLocaleString()}`
+                ? `Purchase this item for ₹${item.purchasePrice?.toLocaleString('en-IN')}`
                 : 'Select your rental dates'}
             </DialogDescription>
           </DialogHeader>
@@ -174,7 +174,7 @@ export const RentalCard = ({ item }: RentalCardProps) => {
               </div>
               <div className="bg-muted p-4 rounded-lg">
                 <p className="text-sm font-semibold">Rental Price</p>
-                <p className="text-2xl font-bold text-primary">${item.price}/{item.duration}</p>
+                <p className="text-2xl font-bold text-primary">₹{item.price.toLocaleString('en-IN')}/{item.duration}</p>
               </div>
             </div>
           )}
@@ -182,7 +182,7 @@ export const RentalCard = ({ item }: RentalCardProps) => {
           {bookingType === 'buy' && (
             <div className="bg-muted p-4 rounded-lg my-4">
               <p className="text-sm font-semibold">Purchase Price</p>
-              <p className="text-2xl font-bold text-primary">${item.purchasePrice?.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-primary">₹{item.purchasePrice?.toLocaleString('en-IN')}</p>
             </div>
           )}
 
