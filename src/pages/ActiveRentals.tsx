@@ -5,13 +5,34 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, MapPin, Package, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useState } from 'react';
 
 export default function ActiveRentals() {
   const { activeRentals, updateRentalStatus } = useActiveRentals();
+  const [releasingPayment, setReleasingPayment] = useState<string | null>(null);
 
-  const handleComplete = (id: string) => {
-    updateRentalStatus(id, 'completed');
-    toast.success('Rental marked as completed');
+  const handleComplete = async (id: string) => {
+    setReleasingPayment(id);
+    
+    try {
+      // Release payment
+      const { error } = await supabase.functions.invoke('release-payment', {
+        body: { rentalId: id },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      updateRentalStatus(id, 'completed');
+      toast.success('Rental completed and payment released');
+    } catch (error: any) {
+      console.error('Error completing rental:', error);
+      toast.error(error.message || 'Failed to complete rental');
+    } finally {
+      setReleasingPayment(null);
+    }
   };
 
   const handleCancel = (id: string) => {
@@ -90,8 +111,11 @@ export default function ActiveRentals() {
                             Cancel
                           </Button>
                           {!rental.isPurchase && (
-                            <Button onClick={() => handleComplete(rental.id)}>
-                              Complete Rental
+                            <Button 
+                              onClick={() => handleComplete(rental.id)}
+                              disabled={releasingPayment === rental.id}
+                            >
+                              {releasingPayment === rental.id ? 'Processing...' : 'Complete Rental'}
                             </Button>
                           )}
                         </div>

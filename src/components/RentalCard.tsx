@@ -43,21 +43,39 @@ export const RentalCard = ({ item }: RentalCardProps) => {
     setShowBooking(true);
   };
 
-  const confirmBooking = () => {
-    const rental = {
-      id: `rental-${Date.now()}`,
-      rentalItemId: item.id,
-      item,
-      startDate: bookingType === 'rent' ? startDate : new Date().toISOString(),
-      endDate: bookingType === 'rent' ? endDate : new Date().toISOString(),
-      totalPrice: bookingType === 'buy' ? (item.purchasePrice || 0) : item.price,
-      isPurchase: bookingType === 'buy',
-      status: 'active' as const,
-    };
+  const confirmBooking = async () => {
+    const totalPrice = bookingType === 'buy' ? (item.purchasePrice || 0) : item.price;
+    const rentalId = `rental-${Date.now()}`;
     
-    addRental(rental);
-    setShowBooking(false);
-    toast.success(bookingType === 'buy' ? 'Purchase confirmed!' : 'Rental booked successfully!');
+    // Import payment helper
+    const { initiateRazorpayPayment } = await import('@/components/RazorpayCheckout');
+    
+    // Initiate payment
+    await initiateRazorpayPayment(
+      totalPrice,
+      rentalId,
+      () => {
+        // Payment success callback
+        const rental = {
+          id: rentalId,
+          rentalItemId: item.id,
+          item,
+          startDate: bookingType === 'rent' ? startDate : new Date().toISOString(),
+          endDate: bookingType === 'rent' ? endDate : new Date().toISOString(),
+          totalPrice,
+          isPurchase: bookingType === 'buy',
+          status: 'active' as const,
+        };
+        
+        addRental(rental);
+        setShowBooking(false);
+        toast.success(bookingType === 'buy' ? 'Purchase confirmed!' : 'Rental booked successfully!');
+      },
+      () => {
+        // Payment failure callback
+        setShowBooking(false);
+      }
+    );
   };
 
   return (
