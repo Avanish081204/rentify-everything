@@ -16,6 +16,9 @@ export default function ListItem() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -27,11 +30,30 @@ export default function ListItem() {
     location: '',
     condition: 'good',
     features: '',
-    image_url: '',
     free_delivery: false,
     insurance: false,
     instant_booking: false,
   });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "Image size should be less than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +71,29 @@ export default function ListItem() {
     setLoading(true);
 
     try {
+      let imageUrl = null;
+
+      // Upload image if selected
+      if (imageFile) {
+        setUploading(true);
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('rental-images')
+          .upload(filePath, imageFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('rental-images')
+          .getPublicUrl(filePath);
+
+        imageUrl = publicUrl;
+        setUploading(false);
+      }
+
       const featuresArray = formData.features
         .split(',')
         .map(f => f.trim())
@@ -68,7 +113,7 @@ export default function ListItem() {
           location: formData.location,
           condition: formData.condition,
           features: featuresArray,
-          image_url: formData.image_url || null,
+          image_url: imageUrl,
           free_delivery: formData.free_delivery,
           insurance: formData.insurance,
           instant_booking: formData.instant_booking,
@@ -90,6 +135,7 @@ export default function ListItem() {
       });
     } finally {
       setLoading(false);
+      setUploading(false);
     }
   };
 
@@ -239,13 +285,24 @@ export default function ListItem() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image_url">Image URL (Optional)</Label>
+              <Label htmlFor="image">Upload Image</Label>
               <Input
-                id="image_url"
-                type="url"
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="cursor-pointer"
               />
+              {imagePreview && (
+                <div className="mt-2 relative w-full h-48 rounded-md overflow-hidden">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">Max size: 5MB</p>
             </div>
 
             <div className="space-y-4">
@@ -277,11 +334,11 @@ export default function ListItem() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
+            <Button type="submit" className="w-full" disabled={loading || uploading}>
+              {loading || uploading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Listing...
+                  {uploading ? 'Uploading image...' : 'Listing...'}
                 </>
               ) : (
                 'List Item'
