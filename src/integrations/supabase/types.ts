@@ -62,6 +62,75 @@ export type Database = {
         }
         Relationships: []
       }
+      rental_listings: {
+        Row: {
+          available_from: string
+          category: string
+          condition: string
+          created_at: string
+          description: string
+          duration: string
+          features: string[] | null
+          free_delivery: boolean | null
+          id: string
+          image_url: string | null
+          instant_booking: boolean | null
+          insurance: boolean | null
+          is_active: boolean | null
+          location: string
+          price: number
+          purchase_price: number | null
+          subcategory: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available_from?: string
+          category: string
+          condition: string
+          created_at?: string
+          description: string
+          duration: string
+          features?: string[] | null
+          free_delivery?: boolean | null
+          id?: string
+          image_url?: string | null
+          instant_booking?: boolean | null
+          insurance?: boolean | null
+          is_active?: boolean | null
+          location: string
+          price: number
+          purchase_price?: number | null
+          subcategory: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available_from?: string
+          category?: string
+          condition?: string
+          created_at?: string
+          description?: string
+          duration?: string
+          features?: string[] | null
+          free_delivery?: boolean | null
+          id?: string
+          image_url?: string | null
+          instant_booking?: boolean | null
+          insurance?: boolean | null
+          is_active?: boolean | null
+          location?: string
+          price?: number
+          purchase_price?: number | null
+          subcategory?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

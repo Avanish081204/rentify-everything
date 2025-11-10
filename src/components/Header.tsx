@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Home, Search, Building2, Car, Wrench, Heart, LayoutDashboard, LogOut, Package } from 'lucide-react';
+import { Menu, X, Home, Search, Building2, Car, Wrench, Heart, LayoutDashboard, LogOut, Package, PlusCircle, ListChecks } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveRentals } from '@/hooks/useActiveRentals';
@@ -65,6 +65,17 @@ export const Header = () => {
           </Link>
           {isAuthenticated ? (
             <>
+              <Link to="/list-item">
+                <Button variant="default" className="gap-2">
+                  <PlusCircle className="h-4 w-4" />
+                  List Item
+                </Button>
+              </Link>
+              <Link to="/my-listings">
+                <Button variant="ghost" size="icon">
+                  <ListChecks className="h-5 w-5" />
+                </Button>
+              </Link>
               <Link to="/active-rentals">
                 <Button variant="ghost" size="icon" className="relative">
                   <Package className="h-5 w-5" />
@@ -133,6 +144,18 @@ export const Header = () => {
               </Link>
               {isAuthenticated ? (
                 <>
+                  <Link to="/list-item" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="default" className="w-full justify-start gap-2">
+                      <PlusCircle className="h-4 w-4" />
+                      List Item
+                    </Button>
+                  </Link>
+                  <Link to="/my-listings" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start gap-2">
+                      <ListChecks className="h-4 w-4" />
+                      My Listings
+                    </Button>
+                  </Link>
                   <Link to="/active-rentals" onClick={() => setMobileMenuOpen(false)}>
                     <Button variant="ghost" className="w-full justify-start gap-2">
                       <Package className="h-4 w-4" />
