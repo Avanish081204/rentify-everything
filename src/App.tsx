@@ -18,6 +18,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ListItem from "./pages/ListItem";
 import MyListings from "./pages/MyListings";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
                 <Route path="/favorites" element={<Favorites />} />
                 <Route path="/list-item" element={<ListItem />} />
                 <Route path="/my-listings" element={<MyListings />} />
+                <Route path="/admin" element={<AdminPanel />} />
                 <Route path="/auth/signin" element={<SignIn />} />
                 <Route path="/auth/signup" element={<SignUp />} />
                 <Route path="*" element={<NotFound />} />

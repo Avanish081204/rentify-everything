@@ -1,9 +1,10 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Home, Search, Building2, Car, Wrench, Heart, LayoutDashboard, LogOut, Package, PlusCircle, ListChecks } from 'lucide-react';
+import { Menu, X, Home, Search, Building2, Car, Wrench, Heart, LayoutDashboard, LogOut, Package, PlusCircle, ListChecks, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveRentals } from '@/hooks/useActiveRentals';
+import { useAdminCheck } from '@/hooks/useAdminCheck';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
@@ -13,6 +14,7 @@ export const Header = () => {
   const navigate = useNavigate();
   const { isAuthenticated, logout, user } = useAuth();
   const { activeCount } = useActiveRentals();
+  const { isAdmin } = useAdminCheck();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -92,6 +94,14 @@ export const Header = () => {
                   Dashboard
                 </Button>
               </Link>
+              {isAdmin && (
+                <Link to="/admin">
+                  <Button variant="outline" className="gap-2">
+                    <Shield className="h-4 w-4" />
+                    Admin
+                  </Button>
+                </Link>
+              )}
               <Button variant="ghost" onClick={handleLogout} className="gap-2">
                 <LogOut className="h-4 w-4" />
                 Logout
@@ -171,6 +181,14 @@ export const Header = () => {
                       Dashboard
                     </Button>
                   </Link>
+                  {isAdmin && (
+                    <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full justify-start gap-2">
+                        <Shield className="h-4 w-4" />
+                        Admin Panel
+                      </Button>
+                    </Link>
+                  )}
                   <Button variant="ghost" onClick={handleLogout} className="w-full justify-start gap-2">
                     <LogOut className="h-4 w-4" />
                     Logout
