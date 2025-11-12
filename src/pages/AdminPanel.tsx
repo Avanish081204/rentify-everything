@@ -78,31 +78,67 @@ export default function AdminPanel() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [itemsResponse, rentalsResponse] = await Promise.all([
-        supabase
-          .from('rental_items')
-          .select(`
-            *,
-            profiles!owner_id (full_name, email),
-            categories!category_id (name, icon)
-          `)
-          .eq('status', 'pending')
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('rentals')
-          .select(`
-            *,
-            rental_items!item_id (title, image_url),
-            profiles!renter_id (full_name, email)
-          `)
-          .order('created_at', { ascending: false })
-      ]);
+      // Fetch pending rental items
+      const { data: items, error: itemsError } = await supabase
+        .from('rental_items')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
 
-      if (itemsResponse.error) throw itemsResponse.error;
-      if (rentalsResponse.error) throw rentalsResponse.error;
+      if (itemsError) throw itemsError;
 
-      setPendingItems(itemsResponse.data as any);
-      setRentals(rentalsResponse.data as any);
+      // Fetch all rentals
+      const { data: rentalsData, error: rentalsError } = await supabase
+        .from('rentals')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (rentalsError) throw rentalsError;
+
+      // Fetch owner profiles for items
+      const ownerIds = items?.map(item => item.owner_id) || [];
+      const { data: ownerProfiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', ownerIds);
+
+      // Fetch categories for items
+      const categoryIds = items?.map(item => item.category_id).filter(Boolean) || [];
+      const { data: categoriesData } = await supabase
+        .from('categories')
+        .select('id, name, icon')
+        .in('id', categoryIds);
+
+      // Fetch renter profiles for rentals
+      const renterIds = rentalsData?.map(rental => rental.renter_id) || [];
+      const { data: renterProfiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', renterIds);
+
+      // Fetch rental items for rentals
+      const itemIds = rentalsData?.map(rental => rental.item_id) || [];
+      const { data: rentalItemsData } = await supabase
+        .from('rental_items')
+        .select('id, title, image_url')
+        .in('id', itemIds);
+
+      // Map profiles and categories to items
+      const itemsWithDetails = items?.map(item => ({
+        ...item,
+        profiles: ownerProfiles?.find(p => p.id === item.owner_id) || null,
+        categories: categoriesData?.find(c => c.id === item.category_id) || null
+      })) || [];
+
+      // Map profiles and items to rentals
+      const rentalsWithDetails = rentalsData?.map(rental => ({
+        ...rental,
+        profiles: renterProfiles?.find(p => p.id === rental.renter_id) || null,
+        rental_items: rentalItemsData?.find(i => i.id === rental.item_id) || null
+      })) || [];
+
+      setPendingItems(itemsWithDetails);
+      setRentals(rentalsWithDetails);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Failed to load data');
