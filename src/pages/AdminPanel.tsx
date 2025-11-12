@@ -43,7 +43,7 @@ interface Rental {
     title: string;
     image_url: string | null;
   } | null;
-  renter: {
+  profiles: {
     full_name: string | null;
     email: string | null;
   } | null;
@@ -83,8 +83,8 @@ export default function AdminPanel() {
           .from('rental_items')
           .select(`
             *,
-            profiles:owner_id (full_name, email),
-            categories:category_id (name, icon)
+            profiles!owner_id (full_name, email),
+            categories!category_id (name, icon)
           `)
           .eq('status', 'pending')
           .order('created_at', { ascending: false }),
@@ -92,8 +92,8 @@ export default function AdminPanel() {
           .from('rentals')
           .select(`
             *,
-            rental_items:item_id (title, image_url),
-            renter:renter_id (full_name, email)
+            rental_items!item_id (title, image_url),
+            profiles!renter_id (full_name, email)
           `)
           .order('created_at', { ascending: false })
       ]);
@@ -288,7 +288,7 @@ export default function AdminPanel() {
                         {rental.rental_items?.title || 'Item Unavailable'}
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        Rented by: {rental.renter?.full_name || rental.renter?.email || 'Unknown'}
+                        Rented by: {rental.profiles?.full_name || rental.profiles?.email || 'Unknown'}
                       </p>
                       <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                         <span>
