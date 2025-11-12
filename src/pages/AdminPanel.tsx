@@ -14,6 +14,8 @@ interface RentalItem {
   id: string;
   title: string;
   description: string;
+  category: string;
+  subcategory: string;
   price: number;
   duration: string;
   location: string;
@@ -21,14 +23,11 @@ interface RentalItem {
   image_url: string | null;
   status: string;
   created_at: string;
-  owner_id: string;
+  user_id: string;
+  features: string[];
   profiles: {
     full_name: string | null;
     email: string | null;
-  } | null;
-  categories: {
-    name: string;
-    icon: string | null;
   } | null;
 }
 
@@ -78,9 +77,9 @@ export default function AdminPanel() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch pending rental items
+      // Fetch pending rental listings
       const { data: items, error: itemsError } = await supabase
-        .from('rental_items')
+        .from('rental_listings')
         .select('*')
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
@@ -96,18 +95,11 @@ export default function AdminPanel() {
       if (rentalsError) throw rentalsError;
 
       // Fetch owner profiles for items
-      const ownerIds = items?.map(item => item.owner_id) || [];
+      const ownerIds = items?.map(item => item.user_id) || [];
       const { data: ownerProfiles } = await supabase
         .from('profiles')
         .select('id, full_name, email')
         .in('id', ownerIds);
-
-      // Fetch categories for items
-      const categoryIds = items?.map(item => item.category_id).filter(Boolean) || [];
-      const { data: categoriesData } = await supabase
-        .from('categories')
-        .select('id, name, icon')
-        .in('id', categoryIds);
 
       // Fetch renter profiles for rentals
       const renterIds = rentalsData?.map(rental => rental.renter_id) || [];
@@ -123,11 +115,10 @@ export default function AdminPanel() {
         .select('id, title, image_url')
         .in('id', itemIds);
 
-      // Map profiles and categories to items
+      // Map profiles to items
       const itemsWithDetails = items?.map(item => ({
         ...item,
-        profiles: ownerProfiles?.find(p => p.id === item.owner_id) || null,
-        categories: categoriesData?.find(c => c.id === item.category_id) || null
+        profiles: ownerProfiles?.find(p => p.id === item.user_id) || null,
       })) || [];
 
       // Map profiles and items to rentals
@@ -151,7 +142,7 @@ export default function AdminPanel() {
     setActionLoading(itemId);
     try {
       const { error } = await supabase
-        .from('rental_items')
+        .from('rental_listings')
         .update({ status: 'approved' })
         .eq('id', itemId);
 
@@ -171,7 +162,7 @@ export default function AdminPanel() {
     setActionLoading(itemId);
     try {
       const { error } = await supabase
-        .from('rental_items')
+        .from('rental_listings')
         .update({ status: 'rejected' })
         .eq('id', itemId);
 
@@ -237,11 +228,9 @@ export default function AdminPanel() {
                   <CardHeader>
                     <div className="flex items-start justify-between gap-2">
                       <CardTitle className="text-lg">{item.title}</CardTitle>
-                      {item.categories && (
-                        <Badge variant="outline">
-                          {item.categories.icon} {item.categories.name}
-                        </Badge>
-                      )}
+                      <Badge variant="outline" className="capitalize">
+                        {item.category}
+                      </Badge>
                     </div>
                     <CardDescription className="line-clamp-2">
                       {item.description}
@@ -251,7 +240,7 @@ export default function AdminPanel() {
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-semibold">${item.price}</span>
+                        <span className="font-semibold">₹{item.price}</span>
                         <span className="text-muted-foreground">/ {item.duration}</span>
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
@@ -261,6 +250,9 @@ export default function AdminPanel() {
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Calendar className="h-4 w-4" />
                         <span>{new Date(item.created_at).toLocaleDateString()}</span>
+                      </div>
+                      <div className="text-muted-foreground">
+                        <span className="font-medium">Location:</span> {item.location}
                       </div>
                     </div>
                     <div className="flex gap-2">

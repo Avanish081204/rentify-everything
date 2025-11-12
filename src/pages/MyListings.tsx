@@ -18,6 +18,7 @@ interface Listing {
   location: string;
   condition: string;
   is_active: boolean;
+  status: string;
   created_at: string;
   image_url?: string;
 }
@@ -152,11 +153,25 @@ export default function MyListings() {
                 </div>
               )}
               <CardHeader>
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-start gap-2">
                   <CardTitle className="line-clamp-1">{listing.title}</CardTitle>
-                  <Badge variant={listing.is_active ? 'default' : 'secondary'}>
-                    {listing.is_active ? 'Active' : 'Inactive'}
-                  </Badge>
+                  <div className="flex gap-2">
+                    <Badge 
+                      variant={
+                        listing.status === 'approved' ? 'default' : 
+                        listing.status === 'pending' ? 'secondary' : 
+                        'destructive'
+                      }
+                      className="capitalize"
+                    >
+                      {listing.status}
+                    </Badge>
+                    {listing.status === 'approved' && (
+                      <Badge variant={listing.is_active ? 'default' : 'secondary'}>
+                        {listing.is_active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <CardDescription className="line-clamp-2">
                   {listing.description}
@@ -188,6 +203,7 @@ export default function MyListings() {
                   size="sm"
                   onClick={() => toggleActive(listing.id, listing.is_active)}
                   className="flex-1"
+                  disabled={listing.status !== 'approved'}
                 >
                   {listing.is_active ? (
                     <>

@@ -123,7 +123,7 @@ export default function ListItem() {
 
       toast({
         title: "Success!",
-        description: "Your item has been listed",
+        description: "Your item has been submitted for approval. You'll be notified once it's reviewed.",
       });
 
       navigate('/my-listings');
